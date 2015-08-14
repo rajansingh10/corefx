@@ -99,13 +99,13 @@
           "lib/dotnet/System.IO.FileSystem.Primitives.dll": {}
         }
       },
-      "System.Linq/4.0.0-beta-23127": {
+      "System.Linq/4.0.0": {
         "dependencies": {
-          "System.Runtime": "4.0.20-beta-23127",
-          "System.Collections": "4.0.10-beta-23127",
-          "System.Resources.ResourceManager": "4.0.0-beta-23127",
-          "System.Diagnostics.Debug": "4.0.10-beta-23127",
-          "System.Runtime.Extensions": "4.0.10-beta-23127"
+          "System.Runtime": "4.0.20",
+          "System.Collections": "4.0.10",
+          "System.Resources.ResourceManager": "4.0.0",
+          "System.Diagnostics.Debug": "4.0.10",
+          "System.Runtime.Extensions": "4.0.10"
         },
         "compile": {
           "ref/dotnet/System.Linq.dll": {}
@@ -143,6 +143,7 @@
           "lib/DNXCore50/System.Reflection.Primitives.dll": {}
         }
       },
+<<<<<<< HEAD
       "System.Reflection.TypeExtensions/4.0.0": {
         "dependencies": {
           "System.Runtime": "4.0.0",
@@ -155,6 +156,8 @@
           "lib/DNXCore50/System.Reflection.TypeExtensions.dll": {}
         }
       },
+=======
+>>>>>>> Update corefx packages to latest
       "System.Resources.ResourceManager/4.0.0": {
         "dependencies": {
           "System.Runtime": "4.0.0",
@@ -215,10 +218,17 @@
           "lib/DNXCore50/System.Runtime.InteropServices.dll": {}
         }
       },
+<<<<<<< HEAD
       "System.Runtime.InteropServices.RuntimeInformation/4.0.0-beta-23121": {
         "dependencies": {
           "System.Runtime": "4.0.20-beta-23121",
           "System.Resources.ResourceManager": "4.0.0-beta-23121"
+=======
+      "System.Runtime.InteropServices.RuntimeInformation/4.0.0-beta-23213": {
+        "dependencies": {
+          "System.Runtime": "4.0.20",
+          "System.Resources.ResourceManager": "4.0.0"
+>>>>>>> Update corefx packages to latest
         },
         "compile": {
           "ref/dotnet/System.Runtime.InteropServices.RuntimeInformation.dll": {}
@@ -323,20 +333,25 @@
           "lib/dnxcore50/xunit.execution.dnx.dll": {}
         }
       },
+<<<<<<< HEAD
       "xunit.netcore.extensions/1.0.0-prerelease-00075": {
+=======
+      "xunit.netcore.extensions/1.0.0-prerelease-00077": {
+>>>>>>> Update corefx packages to latest
         "dependencies": {
-          "System.Diagnostics.Debug": "4.0.10-beta-23127",
-          "System.IO": "4.0.10-beta-23127",
-          "System.Linq": "4.0.0-beta-23127",
-          "System.Reflection": "4.0.10-beta-23127",
-          "System.Reflection.Primitives": "4.0.0-beta-23127",
-          "System.Runtime": "4.0.20-beta-23127",
-          "System.Runtime.Extensions": "4.0.10-beta-23127",
-          "System.Runtime.Handles": "4.0.0-beta-23127",
-          "System.Runtime.InteropServices": "4.0.20-beta-23127",
-          "System.Text.Encoding": "4.0.10-beta-23127",
-          "System.Threading": "4.0.10-beta-23127",
-          "System.Threading.Tasks": "4.0.10-beta-23127",
+          "System.Diagnostics.Debug": "4.0.10",
+          "System.IO": "4.0.10",
+          "System.Linq": "4.0.0",
+          "System.Reflection": "4.0.10",
+          "System.Reflection.Primitives": "4.0.0",
+          "System.Runtime": "4.0.20",
+          "System.Runtime.Extensions": "4.0.10",
+          "System.Runtime.Handles": "4.0.0",
+          "System.Runtime.InteropServices": "4.0.20",
+          "System.Runtime.InteropServices.RuntimeInformation": "4.0.0-beta-23213",
+          "System.Text.Encoding": "4.0.10",
+          "System.Threading": "4.0.10",
+          "System.Threading.Tasks": "4.0.10",
           "xunit": "2.1.0-beta3-build3029"
         },
         "compile": {
@@ -382,6 +397,7 @@
         "runtimes/win8-aot/lib/netcore50/System.Collections.dll"
       ]
     },
+<<<<<<< HEAD
     "System.Collections.Concurrent/4.0.0": {
       "sha512": "1f5SWoX7UlFkvUt7A8JoG5lXgZDw4cRAcKG8Eaxa+3Sq6e/UgVWl2YWew1evJv+p+edNNlIIorDfREKcoEDHGw==",
       "files": [
@@ -620,12 +636,12 @@
         "ref/xamarinmac20/_._"
       ]
     },
-    "System.Linq/4.0.0-beta-23127": {
+    "System.Linq/4.0.0": {
       "serviceable": true,
-      "sha512": "pvB6d8TuwcsU20Im73SKprww15O6Nf48NPd80rmJHDJofRgpzMZ6M5VTBcMXBMlS8jXHpq0ORXOUQ8F+0OmVCg==",
+      "sha512": "r6Hlc+ytE6m/9UBr+nNRRdoJEWjoeQiT3L3lXYFDHoXk3VYsRBCDNXrawcexw7KPLaH0zamQLiAb6avhZ50cGg==",
       "files": [
-        "System.Linq.4.0.0-beta-23127.nupkg",
-        "System.Linq.4.0.0-beta-23127.nupkg.sha512",
+        "System.Linq.4.0.0.nupkg",
+        "System.Linq.4.0.0.nupkg.sha512",
         "System.Linq.nuspec",
         "lib/dotnet/System.Linq.dll",
         "lib/net45/_._",
@@ -731,6 +747,7 @@
         "runtimes/win8-aot/lib/netcore50/System.Reflection.Primitives.dll"
       ]
     },
+<<<<<<< HEAD
     "System.Reflection.TypeExtensions/4.0.0": {
       "serviceable": true,
       "sha512": "YRM/msNAM86hdxPyXcuZSzmTO0RQFh7YMEPBLTY8cqXvFPYIx2x99bOyPkuU81wRYQem1c1HTkImQ2DjbOBfew==",
@@ -768,6 +785,12 @@
       "serviceable": true,
       "sha512": "qmqeZ4BJgjfU+G2JbrZt4Dk1LsMxO4t+f/9HarNY6w8pBgweO6jT+cknUH7c3qIrGvyUqraBhU45Eo6UtA0fAw==",
       "files": [
+=======
+    "System.Resources.ResourceManager/4.0.0": {
+      "serviceable": true,
+      "sha512": "qmqeZ4BJgjfU+G2JbrZt4Dk1LsMxO4t+f/9HarNY6w8pBgweO6jT+cknUH7c3qIrGvyUqraBhU45Eo6UtA0fAw==",
+      "files": [
+>>>>>>> Update corefx packages to latest
         "System.Resources.ResourceManager.4.0.0.nupkg",
         "System.Resources.ResourceManager.4.0.0.nupkg.sha512",
         "System.Resources.ResourceManager.nuspec",
@@ -929,12 +952,21 @@
         "runtimes/win8-aot/lib/netcore50/System.Runtime.InteropServices.dll"
       ]
     },
+<<<<<<< HEAD
     "System.Runtime.InteropServices.RuntimeInformation/4.0.0-beta-23121": {
       "serviceable": true,
       "sha512": "epX3CWkuqjZkQL1E6xj3UlU6BJLoni+sOFroS+pwFs8k/gCMxxH+9K+gBmrTOfunSVu9acbwVkMeFxQHzXqXLw==",
       "files": [
         "System.Runtime.InteropServices.RuntimeInformation.4.0.0-beta-23121.nupkg",
         "System.Runtime.InteropServices.RuntimeInformation.4.0.0-beta-23121.nupkg.sha512",
+=======
+    "System.Runtime.InteropServices.RuntimeInformation/4.0.0-beta-23213": {
+      "serviceable": true,
+      "sha512": "yzVJM7dF6XqnGTkv2IRufKs8AiqDpfdfBvMT5sVgY2fCtUXdkcjxiIWzaVIau8IYrJUlQDmSpeQ8NV6l1vz0Lg==",
+      "files": [
+        "System.Runtime.InteropServices.RuntimeInformation.4.0.0-beta-23213.nupkg",
+        "System.Runtime.InteropServices.RuntimeInformation.4.0.0-beta-23213.nupkg.sha512",
+>>>>>>> Update corefx packages to latest
         "System.Runtime.InteropServices.RuntimeInformation.nuspec",
         "lib/dotnet/System.Runtime.InteropServices.RuntimeInformation.dll",
         "lib/MonoAndroid10/_._",
@@ -1179,12 +1211,21 @@
         "lib/Xamarin.iOS/xunit.execution.iOS-Universal.xml"
       ]
     },
+<<<<<<< HEAD
     "xunit.netcore.extensions/1.0.0-prerelease-00075": {
       "serviceable": true,
       "sha512": "crNU2PbilYFmbAwmiIYSGVSTRrY4Su+h4qmkeotRe41jxyJnzcfZwtY2/xFK9RiXFYjiTJrF/pRc589eNFljsw==",
       "files": [
         "xunit.netcore.extensions.1.0.0-prerelease-00075.nupkg",
         "xunit.netcore.extensions.1.0.0-prerelease-00075.nupkg.sha512",
+=======
+    "xunit.netcore.extensions/1.0.0-prerelease-00077": {
+      "serviceable": true,
+      "sha512": "oP5LBz8bPVMDShN/l6lDznMZbYEkX3BNGuFkwE0ncjnAIMa7T5n84iTL2sAzya/Re0cfgYyihtnuuI5kvahPAw==",
+      "files": [
+        "xunit.netcore.extensions.1.0.0-prerelease-00077.nupkg",
+        "xunit.netcore.extensions.1.0.0-prerelease-00077.nupkg.sha512",
+>>>>>>> Update corefx packages to latest
         "xunit.netcore.extensions.nuspec",
         "lib/dotnet/Xunit.NetCore.Extensions.dll"
       ]
