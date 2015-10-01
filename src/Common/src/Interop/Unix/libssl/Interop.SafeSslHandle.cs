@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
@@ -31,8 +32,8 @@ internal static partial class Interop
 
         internal sealed class SafeSslHandle : SafeHandle
         {
-            private readonly SafeBioHandle _readBio;
-            private readonly SafeBioHandle _writeBio;
+            private SafeBioHandle _readBio;
+            private SafeBioHandle _writeBio;
             private bool _isServer;
 
             public bool IsServer
@@ -56,29 +57,42 @@ internal static partial class Interop
                 }
             }
 
-            public SafeSslHandle(SafeSslContextHandle context, bool isServer)
-                : base(IntPtr.Zero, true)
+            public static SafeSslHandle Create(SafeSslContextHandle context, bool isServer)
             {
-                _isServer = isServer;
-
-                IntPtr memMethod = Interop.libcrypto.BIO_s_mem();
-                _readBio = Interop.libcrypto.BIO_new(memMethod);
-                _writeBio = Interop.libcrypto.BIO_new(memMethod);
-                
-                IntPtr tempHandle = SSL_new(context);
-                if (tempHandle == IntPtr.Zero)
+                IntPtr memMethod = libcrypto.BIO_s_mem();
+                SafeBioHandle readBio = libcrypto.BIO_new(memMethod);
+                if (readBio.IsInvalid)
                 {
-                    return;
+                    return new SafeSslHandle();
                 }
+                SafeBioHandle writeBio = libcrypto.BIO_new(memMethod);
+                if (writeBio.IsInvalid)
+                {
+                    readBio.Dispose();
+                    return new SafeSslHandle();
+                }
+                
+                SafeSslHandle handle = SSL_new(context);
+                if (handle.IsInvalid)
+                {
+                    readBio.Dispose();
+                    writeBio.Dispose();
+                    return handle;
+                }
+                handle._isServer = isServer;
 
                 // After SSL_set_bio, the BIO handles are owned by SSL pointer
                 // and are automatically freed by SSL_free. To prevent a double
                 // free, we need to keep the ref counts bumped up till SSL_free
-                bool gotReadRef = false, gotWriteRef = false;
-                _readBio.DangerousAddRef(ref gotReadRef);
-                _writeBio.DangerousAddRef(ref gotWriteRef);
-                SSL_set_bio(tempHandle, _readBio.DangerousGetHandle(), _writeBio.DangerousGetHandle());
-                handle = tempHandle;
+                bool gotRef = false;
+                readBio.DangerousAddRef(ref gotRef);
+                Debug.Assert(gotRef, "Unexpected failure in AddRef of read Bio");
+                handle._readBio = readBio;
+                gotRef = false;
+                writeBio.DangerousAddRef(ref gotRef);
+                handle._writeBio = writeBio;
+                Debug.Assert(gotRef, "Unexpected failure in AddRef of write Bio");
+                SSL_set_bio(handle, readBio, writeBio);
 
                 if (isServer)
                 {
@@ -88,6 +102,7 @@ internal static partial class Interop
                 {
                     SSL_set_connect_state(handle);
                 }
+                return handle;
             }
 
             public override bool IsInvalid
@@ -102,6 +117,10 @@ internal static partial class Interop
                 _writeBio.SetHandleAsInvalid();  // BIO got freed in SSL_free
                 return true;
             }
+
+            private SafeSslHandle() : base(IntPtr.Zero, true)
+            {
+            }   
         }
     }
 }

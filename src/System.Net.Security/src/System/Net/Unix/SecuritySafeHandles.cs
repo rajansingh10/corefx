@@ -25,11 +25,11 @@ namespace System.Net.Security
         {
             if ((null != certificate) && !certificate.IsInvalid)
             {
-                _certificate = Interop.libcrypto.X509_dup(certificate);
-                if (!IsInvalid)
-                {
-                    handle = _certificate.DangerousGetHandle();
-                }
+                bool gotRef = false;
+                certificate.DangerousAddRef(ref gotRef);
+                Debug.Assert(gotRef, "Unexpected failure in AddRef of certificate");
+                _certificate = certificate;
+                handle = _certificate.DangerousGetHandle();
             }
         }
 
@@ -37,12 +37,13 @@ namespace System.Net.Security
         {
             get
             {
-                return ((null == _certificate) || _certificate.IsInvalid);
+                return handle == IntPtr.Zero;
             }
         }
 
         protected override bool ReleaseHandle()
         {
+            _certificate.DangerousRelease();
             _certificate.Dispose();
             return true;
         }

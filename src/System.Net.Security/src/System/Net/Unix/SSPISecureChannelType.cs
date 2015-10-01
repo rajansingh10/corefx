@@ -108,10 +108,9 @@ namespace System.Net
             remoteCertContext = null;
             try
             {
-                using (SafeX509Handle certPtr = Interop.OpenSsl.GetPeerCertificate(securityContext.SslContext))
-                {
-                    remoteCertContext = new SafeFreeCertContext(certPtr);
-                }
+                SafeX509Handle remoteCertificate = Interop.OpenSsl.GetPeerCertificate(securityContext.SslContext);
+                // Note that cert ownership is transferred to SafeFreeCertContext
+                remoteCertContext = new SafeFreeCertContext(remoteCertificate);
                 return 0;
             }
             catch

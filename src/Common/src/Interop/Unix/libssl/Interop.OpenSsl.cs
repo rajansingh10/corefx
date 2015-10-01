@@ -21,43 +21,37 @@ internal static partial class Interop
         {
             SafeSslHandle context = null;
 
-            try
+            IntPtr method = GetSslMethod(isServer, options);
+
+            using (libssl.SafeSslContextHandle innerContext = new libssl.SafeSslContextHandle(method))
             {
-                IntPtr method = GetSslMethod(isServer, options);
-
-                using (libssl.SafeSslContextHandle sslContext = new libssl.SafeSslContextHandle(method))
+                if (innerContext.IsInvalid)
                 {
-                    if ((null == sslContext) || sslContext.IsInvalid)
-                    {
-                        throw CreateSslException("Failed to allocate SSL/TLS context");
-                    }
-
-                    libssl.SSL_CTX_ctrl(sslContext, libssl.SSL_CTRL_OPTIONS, options, IntPtr.Zero);
-
-                    libssl.SSL_CTX_set_quiet_shutdown(sslContext, 1);
-
-                    if (certHandle != null && certKeyHandle != null)
-                    {
-                        SetSslCertificate(sslContext, certHandle, certKeyHandle);
-                    }
-
-                    context = new SafeSslHandle(sslContext, isServer);
+                    throw CreateSslException("Failed to allocate SSL/TLS context");
                 }
 
-                if (context.IsInvalid)
+                libssl.SSL_CTX_ctrl(innerContext, libssl.SSL_CTRL_OPTIONS, options, IntPtr.Zero);
+
+                libssl.SSL_CTX_set_quiet_shutdown(innerContext, 1);
+
+                if (certHandle != null && certKeyHandle != null)
                 {
-                    throw CreateSslException("Failed to create SSL object from SSL context");
-                }      
-            }
-            catch
-            {
-                if (null != context)
-                {
-                    context.Dispose();
-                    context = null;
+                    SetSslCertificate(innerContext, certHandle, certKeyHandle);
                 }
+
+                context = SafeSslHandle.Create(innerContext, isServer);
             }
-            return context;
+
+            if ((null != context) && !context.IsInvalid)
+            {
+                return context;
+            }
+
+            if (null != context)
+            {
+                context.Dispose();
+            }
+            throw CreateSslException("Failed to create SSL object from SSL context");
         }
 
         internal static bool DoSslHandshake(SafeSslHandle context, IntPtr recvPtr, int recvCount, out IntPtr sendPtr, out int sendCount)

@@ -32,7 +32,7 @@ internal static partial class Interop
         internal static extern long SSL_CTX_ctrl(SafeSslContextHandle ctx, int cmd, long larg, IntPtr parg);
 
         [DllImport(Interop.Libraries.LibSsl)]
-        internal static extern IntPtr SSL_new(SafeSslContextHandle ctx);
+        internal static extern SafeSslHandle SSL_new(SafeSslContextHandle ctx);
 
         [DllImport(Interop.Libraries.LibSsl)]
         internal static extern ulong ERR_get_error();
@@ -50,10 +50,10 @@ internal static partial class Interop
         internal static extern void SSL_CTX_free(IntPtr ctx);
 
         [DllImport(Interop.Libraries.LibSsl)]
-        internal static extern void SSL_set_connect_state(IntPtr ssl);
+        internal static extern void SSL_set_connect_state(SafeSslHandle ssl);
 
         [DllImport(Interop.Libraries.LibSsl)]
-        internal static extern void SSL_set_accept_state(IntPtr ssl);
+        internal static extern void SSL_set_accept_state(SafeSslHandle ssl);
 
         [DllImport(Interop.Libraries.LibSsl)]
         internal static extern int SSL_write(SafeSslHandle ssl, IntPtr buf, int num);
@@ -68,7 +68,7 @@ internal static partial class Interop
         internal static extern int SSL_shutdown(SafeSslHandle ssl);
 
         [DllImport(Interop.Libraries.LibSsl)]
-        internal static extern void SSL_set_bio(IntPtr ssl, IntPtr rbio, IntPtr wbio);
+        internal static extern void SSL_set_bio(SafeSslHandle ssl, SafeBioHandle rbio, SafeBioHandle wbio);
 
         [DllImport(Interop.Libraries.LibSsl)]
         internal static extern int SSL_do_handshake(SafeSslHandle ssl);
