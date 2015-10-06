@@ -505,7 +505,15 @@ namespace System.Reflection.Metadata
                 currentTableBit <<= 1;
             }
 
-            return rowCounts;
+            metadataTableRowCounts = rowCounts;
+
+            if ((_MetadataTableHeader.HeapSizeFlags & HeapSizeFlag.ExtraData) == HeapSizeFlag.ExtraData)
+            {
+                // Skip "extra data" used by some obfuscators. Although it is not mentioned in the CLI spec,
+                // it is honored by the native metadata reader.
+                memReader.ReadUInt32();
+            }
+		return rowCounts;
         }
 
         private void ReadStandalonePortablePdbStream(MemoryBlock block, out DebugMetadataHeader debugMetadataHeader, out int[] externalTableRowCounts)
