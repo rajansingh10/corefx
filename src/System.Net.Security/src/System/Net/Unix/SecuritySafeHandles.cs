@@ -23,6 +23,8 @@ namespace System.Net.Security
 
         public SafeFreeCertContext(SafeX509Handle certificate) : base(IntPtr.Zero, true)
         {
+            // In certain scenarios (eg. server querying for a client cert), the
+            // input certificate may be invalid and this is OK
             if ((null != certificate) && !certificate.IsInvalid)
             {
                 bool gotRef = false;

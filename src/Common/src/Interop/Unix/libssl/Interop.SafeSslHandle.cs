@@ -38,7 +38,7 @@ internal static partial class Interop
 
             public bool IsServer
             {
-                get {return _isServer;}
+                get { return _isServer; }
             }
 
             public SafeBioHandle InputBio
@@ -60,11 +60,13 @@ internal static partial class Interop
             public static SafeSslHandle Create(SafeSslContextHandle context, bool isServer)
             {
                 IntPtr memMethod = libcrypto.BIO_s_mem();
+
                 SafeBioHandle readBio = libcrypto.BIO_new(memMethod);
                 if (readBio.IsInvalid)
                 {
                     return new SafeSslHandle();
                 }
+
                 SafeBioHandle writeBio = libcrypto.BIO_new(memMethod);
                 if (writeBio.IsInvalid)
                 {
@@ -86,13 +88,23 @@ internal static partial class Interop
                 // free, we need to keep the ref counts bumped up till SSL_free
                 bool gotRef = false;
                 readBio.DangerousAddRef(ref gotRef);
-                Debug.Assert(gotRef, "Unexpected failure in AddRef of read Bio");
-                handle._readBio = readBio;
-                gotRef = false;
-                writeBio.DangerousAddRef(ref gotRef);
-                handle._writeBio = writeBio;
-                Debug.Assert(gotRef, "Unexpected failure in AddRef of write Bio");
+                try
+                {
+                    bool ignore = false;
+                    writeBio.DangerousAddRef(ref ignore);
+                }
+                catch
+                {
+                    if (gotRef)
+                    {
+                        readBio.DangerousRelease();
+                    }
+                    throw;
+                }
+
                 SSL_set_bio(handle, readBio, writeBio);
+                handle._readBio = readBio;
+                handle._writeBio = writeBio;
 
                 if (isServer)
                 {
@@ -113,8 +125,14 @@ internal static partial class Interop
             protected override bool ReleaseHandle()
             {
                 SSL_free(handle);
-                _readBio.SetHandleAsInvalid();  // BIO got freed in SSL_free
-                _writeBio.SetHandleAsInvalid();  // BIO got freed in SSL_free
+                if (_readBio != null)
+                {
+                    _readBio.SetHandleAsInvalid(); // BIO got freed in SSL_free
+                }
+                if (_writeBio != null)
+                {
+                    _writeBio.SetHandleAsInvalid(); // BIO got freed in SSL_free
+                }
                 return true;
             }
 

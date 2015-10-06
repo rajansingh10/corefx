@@ -40,41 +40,39 @@ internal static partial class Interop
                 }
 
                 context = SafeSslHandle.Create(innerContext, isServer);
+                Debug.Assert(context != null, "Expected non-null return value from SafeSslHandle.Create");
+                if (context.IsInvalid)
+                {
+                    context.Dispose();
+                    throw CreateSslException("Failed to create SSL object from SSL context");
+                }
             }
 
-            if ((null != context) && !context.IsInvalid)
-            {
-                return context;
-            }
-
-            if (null != context)
-            {
-                context.Dispose();
-            }
-            throw CreateSslException("Failed to create SSL object from SSL context");
+            return context;
         }
 
         internal static bool DoSslHandshake(SafeSslHandle context, IntPtr recvPtr, int recvCount, out IntPtr sendPtr, out int sendCount)
         {
             sendPtr = IntPtr.Zero;
             sendCount = 0;
-            bool isServer = context.IsServer;
             if ((IntPtr.Zero != recvPtr) && (recvCount > 0))
             {
                 BioWrite(context.InputBio, recvPtr, recvCount);
             }
 
-            int retVal = libssl.SSL_do_handshake(context);
-            if ((retVal == 1) && !isServer)
-            {            
-                return true;
-            }
-
             libssl.SslErrorCode error;
-
-            if (retVal != 1)
+            int retVal = libssl.SSL_do_handshake(context);
+            if (retVal == 1)
             {
-                error = GetSslError(context.sslPtr, retVal);
+                // In case of a client, this indicates successful handshake completion
+                if (!context.IsServer)
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                error = GetSslError(context, retVal);
 
                 if ((retVal != -1) || (error != libssl.SslErrorCode.SSL_ERROR_WANT_READ))
                 {
@@ -125,7 +123,7 @@ internal static partial class Interop
             }
             else
             {
-                int capacityNeeded = libssl.BIO_ctrl_pending(context.writeBioPtr);      
+                int capacityNeeded = libssl.BIO_ctrl_pending(context.OutputBio);      
 
                 if (capacityNeeded > bufferCapacity)
                 {
@@ -209,6 +207,7 @@ internal static partial class Interop
 
         internal static void FreeSslContext(SafeSslHandle context)
         {
+            Debug.Assert((context != null) && !context.IsInvalid, "Expected a valid context in FreeSslContext");
             Disconnect(context);
             context.Dispose();
         }
@@ -262,14 +261,11 @@ internal static partial class Interop
 
         private static void Disconnect(SafeSslHandle context)
         {
-            if ((null != context) && !context.IsInvalid)
+            int retVal = libssl.SSL_shutdown(context);
+            if (retVal < 0)
             {
-                int retVal = libssl.SSL_shutdown(context);
-                if (retVal < 0)
-                {
-                    //TODO (Issue #3362) check this error
-                    libssl.SSL_get_error(context, retVal);
-                }
+                //TODO (Issue #3362) check this error
+                libssl.SSL_get_error(context, retVal);
             }
         }
 
@@ -297,7 +293,7 @@ internal static partial class Interop
 
         private static libssl.SslErrorCode GetSslError(SafeSslHandle context, int result)
         {
-            libssl.SslErrorCode retVal = libssl.SSL_get_error(sslPtr, result);
+            libssl.SslErrorCode retVal = libssl.SSL_get_error(context, result);
             if (retVal == libssl.SslErrorCode.SSL_ERROR_SYSCALL)
             {
                 retVal = (libssl.SslErrorCode)libssl.ERR_get_error();
