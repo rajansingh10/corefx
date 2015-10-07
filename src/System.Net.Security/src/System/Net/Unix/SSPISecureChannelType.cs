@@ -16,9 +16,8 @@ namespace System.Net
     internal class SSPISecureChannelType : SSPIInterface
     {
         public Exception GetException(SecurityStatus status)
-        {
-            // TODO (Issue #3362) To be implemented
-            return new Exception("status = " + status);
+        {         
+            return new Interop.OpenSsl.SslException((int)status);
         }
 
         public void VerifyPackageInfo()
@@ -236,7 +235,7 @@ namespace System.Net
                             Interop.OpenSsl.Decrypt(scHandle, inputPtr, size, out errorCode);
                     }
                 }
-
+				
                 switch (errorCode)
                 {
                     case Interop.libssl.SslErrorCode.SSL_ERROR_RENEGOTIATE:
