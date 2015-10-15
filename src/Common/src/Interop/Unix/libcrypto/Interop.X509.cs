@@ -60,6 +60,12 @@ internal static partial class Interop
         internal static extern NativeULong X509_issuer_name_hash(SafeX509Handle x);
 
         [DllImport(Libraries.LibCrypto)]
+        internal static extern int X509_digest(SafeX509Handle x, IntPtr type, IntPtr md, ref int len);
+
+        [DllImport(Libraries.LibCrypto)]
+        internal static extern IntPtr EVP_sha256();
+
+        [DllImport(Libraries.LibCrypto)]
         internal static extern int X509_get_ext_count(SafeX509Handle x);
 
         // Returns a pointer already being tracked by the SafeX509Handle, shouldn't be SafeHandle tracked/freed.

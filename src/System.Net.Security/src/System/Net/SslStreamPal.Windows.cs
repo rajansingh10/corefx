@@ -168,7 +168,7 @@ namespace System.Net
             return secStatus;
         }
 
-        public unsafe static SafeFreeContextBufferChannelBinding QueryContextChannelBinding(SafeDeleteContext phContext, ChannelBindingKind attribute)
+        public unsafe static SafeFreeContextBufferChannelBinding QueryContextChannelBinding(SafeDeleteContext phContext, ChannelBindingKind attribute, bool serverMode)
         {
             var refHandle = SafeFreeContextBufferChannelBinding.CreateEmptyHandle();
             

@@ -177,6 +177,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
       <Link>Interop\Unix\Interop.Libraries.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\libssl\Interop.ChannelBinding.cs">
+      <Link>Interop\Unix\libssl\Interop.ChannelBinding.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\libssl\Interop.libssl.cs">
       <Link>Interop\Unix\libssl\Interop.libssl.cs</Link>
     </Compile>

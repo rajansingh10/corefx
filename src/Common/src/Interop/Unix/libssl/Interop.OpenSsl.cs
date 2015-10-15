@@ -7,7 +7,6 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32.SafeHandles;
-
 using SafeSslHandle = Interop.libssl.SafeSslHandle;
 
 internal static partial class Interop
@@ -30,7 +29,7 @@ internal static partial class Interop
                     throw CreateSslException(SR.net_allocate_ssl_context_failed);
                 }
 
-                libssl.SSL_CTX_ctrl(innerContext, libssl.SSL_CTRL_OPTIONS, options, IntPtr.Zero);
+                libssl.SSL_CTX_ctrl(innerContext, (int)libssl.SslCtrl.SSL_CTRL_OPTIONS, options, IntPtr.Zero);
 
                 libssl.SSL_CTX_set_quiet_shutdown(innerContext, 1);
 

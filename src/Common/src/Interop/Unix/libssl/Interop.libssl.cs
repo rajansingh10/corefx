@@ -109,6 +109,20 @@ internal static partial class Interop
         [DllImport(Interop.Libraries.LibSsl)]
         internal static extern void SSL_CTX_set_quiet_shutdown(SafeSslContextHandle ctx, int mode);
 
+        [DllImport(Interop.Libraries.LibSsl)]
+        internal static extern long SSL_ctrl(SafeSslHandle ssl, int cmd, long larg, IntPtr parg);
+
+        [DllImport(Interop.Libraries.LibSsl)]
+        internal static extern int SSL_get_peer_finished(SafeSslHandle ssl, IntPtr buf, int count);
+
+        [DllImport(Interop.Libraries.LibSsl)]
+        internal static extern int SSL_get_finished(SafeSslHandle ssl, IntPtr buf, int count);
+
+        internal static bool SSL_session_reused(SafeSslHandle ssl)
+        {
+            return SSL_ctrl(ssl, (int)libssl.SslCtrl.SSL_CTRL_GET_SESSION_REUSED, 0, IntPtr.Zero) == 1;
+        }
+
         internal static SafeSharedX509NameStackHandle SSL_get_client_CA_list(SafeSslHandle ssl)
         {
             Interop.Crypto.CheckValidOpenSslHandle(ssl);
