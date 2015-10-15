@@ -9,7 +9,6 @@ internal static partial class Interop
 {
     internal static partial class libssl
     {
-        internal const int SSL_CTRL_OPTIONS = 32;
         internal static bool OPENSSL_NO_COMP = true; //no compression true by default
 
         internal const long ProtocolMask = Options.SSL_OP_NO_SSLv2 | Options.SSL_OP_NO_SSLv3 |
@@ -153,5 +152,10 @@ internal static partial class Interop
             SSL_AEAD = 64
         }
 
+        internal enum SslCtrl
+        {
+            SSL_CTRL_GET_SESSION_REUSED = 8,
+            SSL_CTRL_OPTIONS = 32
+        }
     }
 }

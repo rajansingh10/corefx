@@ -64,10 +64,19 @@ namespace System.Net
             return retVal;
         }
 
-        public static SafeFreeContextBufferChannelBinding QueryContextChannelBinding(SafeDeleteContext phContext, ChannelBindingKind attribute)
+        public static SafeFreeContextBufferChannelBinding QueryContextChannelBinding(SafeDeleteContext securityContext, ChannelBindingKind attribute, bool isServer)
         {
-            // TODO (Issue #3362) To be implemented
-            throw NotImplemented.ByDesignWithMessage(SR.net_MethodNotImplementedException);
+            if (attribute != ChannelBindingKind.Endpoint &&
+                attribute != ChannelBindingKind.Unique)
+            {
+                return null;
+            }
+
+            SafeFreeContextBufferChannelBinding refHandle = SafeFreeContextBufferChannelBinding.CreateEmptyHandle();
+
+            SafeFreeContextBufferChannelBinding.QueryContextChannelBinding(securityContext, attribute, isServer, refHandle);
+
+            return refHandle;
         }
 
         public static void QueryContextStreamSizes(SafeDeleteContext securityContext, out StreamSizes streamSizes)
