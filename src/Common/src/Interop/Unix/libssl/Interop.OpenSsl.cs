@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32.SafeHandles;
-
 using SafeSslHandle = Interop.libssl.SafeSslHandle;
 
 internal static partial class Interop
@@ -18,6 +18,30 @@ internal static partial class Interop
         private static libssl.verify_callback s_verifyClientCertificate = VerifyClientCertificate;
 
         #region internal methods
+
+        internal static libssl.SafeChannelBinding QueryChannelBinding(SafeSslHandle context, ChannelBindingKind bindingType)
+        {
+            libssl.SafeChannelBinding bindingHandle;
+            switch (bindingType)
+            {
+                case ChannelBindingKind.Endpoint:
+                    bindingHandle = new libssl.SafeChannelBinding(bindingType);
+                    QueryEndPointChannelBindings(context, bindingHandle);
+                    break;
+
+                case ChannelBindingKind.Unique:
+                    bindingHandle = new libssl.SafeChannelBinding(bindingType);
+                    QueryUniqueChannelBindings(context, bindingHandle);
+                    break;
+
+                default:
+                    // Keeping parity with windows, we should return null in this case.
+                    bindingHandle = null;
+                    break;
+            }
+
+            return bindingHandle;
+        }
 
         internal static SafeSslHandle AllocateSslContext(long options, SafeX509Handle certHandle, SafeEvpPKeyHandle certKeyHandle, string encryptionPolicy, bool isServer, bool remoteCertRequired)
         {
@@ -32,7 +56,7 @@ internal static partial class Interop
                     throw CreateSslException(SR.net_allocate_ssl_context_failed);
                 }
 
-                libssl.SSL_CTX_ctrl(innerContext, libssl.SSL_CTRL_OPTIONS, options, IntPtr.Zero);
+                libssl.SSL_CTX_ctrl(innerContext, libssl.SslCtrlOption.SSL_CTRL_OPTIONS, options, IntPtr.Zero);
 
                 libssl.SSL_CTX_set_quiet_shutdown(innerContext, 1);
 
@@ -224,6 +248,90 @@ internal static partial class Interop
         #endregion
 
         #region private methods
+
+        private static void QueryEndPointChannelBindings(SafeSslHandle context, libssl.SafeChannelBinding bindingHandle)
+        {
+            using (SafeX509Handle certSafeHandle = GetPeerCertificate(context))
+            {
+                if (certSafeHandle == null || certSafeHandle.IsInvalid)
+                {
+                    throw CreateSslException(SR.net_ssl_invalid_certificate);
+                }
+
+                int certHashLength = 0;
+                int retVal = Crypto.X509Digest(certSafeHandle, GetEvpMethodForChannelBinding(certSafeHandle), bindingHandle.CertHashPtr, ref certHashLength);
+
+                if (0 == retVal)
+                {
+                    throw CreateSslException(SR.net_ssl_get_channel_binding_token_failed);
+                }
+
+                bindingHandle.SetCertHashLength(certHashLength);
+            }
+        }
+
+        private static void QueryUniqueChannelBindings(SafeSslHandle context, libssl.SafeChannelBinding bindingHandle)
+        {
+            bool sessionReused = libssl.SSL_session_reused(context);
+            int certHashLength = context.IsServer ^ sessionReused ?
+                                 (int)libssl.SSL_get_peer_finished(context, bindingHandle.CertHashPtr, bindingHandle.Length) :
+                                 (int)libssl.SSL_get_finished(context, bindingHandle.CertHashPtr, bindingHandle.Length);
+
+            if (0 == certHashLength)
+            {
+                throw CreateSslException(SR.net_ssl_get_channel_binding_token_failed);
+            }
+
+            bindingHandle.SetCertHashLength(certHashLength);
+        }
+
+        private static IntPtr GetEvpMethodForChannelBinding(SafeX509Handle certSafeHandle)
+        {
+            bool gotReference = false;
+            try
+            {
+                certSafeHandle.DangerousAddRef(ref gotReference);
+                using (var cert = new X509Certificate2(certSafeHandle.DangerousGetHandle()))
+                {
+                    Oid signatureAlgorithm = cert.SignatureAlgorithm;
+                    switch (signatureAlgorithm.Value)
+                    {
+                        // RFC 5929 4.1 says that MD5 and SHA1 both upgrade to EvpSha256 for cbt calculation
+                        case "1.2.840.113549.2.5": // MD5
+                        case "1.2.840.113549.1.1.4": // MD5RSA
+                        case "1.3.14.3.2.26": // SHA1
+                        case "1.2.840.10040.4.3": // SHA1DSA
+                        case "1.2.840.10045.4.1": // SHA1ECDSA
+                        case "1.2.840.113549.1.1.5": // SHA1RSA
+                        case "2.16.840.1.101.3.4.2.1": // SHA256
+                        case "1.2.840.10045.4.3.2": // SHA256ECDSA
+                        case "1.2.840.113549.1.1.11": // SHA256RSA
+                            return Crypto.EvpSha256();
+
+                        case "2.16.840.1.101.3.4.2.2": // SHA384
+                        case "1.2.840.10045.4.3.3": // SHA384ECDSA
+                        case "1.2.840.113549.1.1.12": // SHA384RSA
+                            return Crypto.EvpSha384();
+
+                        case "2.16.840.1.101.3.4.2.3": // SHA512
+                        case "1.2.840.10045.4.3.4": // SHA512ECDSA
+                        case "1.2.840.113549.1.1.13": // SHA512RSA
+                            return Crypto.EvpSha512();
+
+                        default:
+                            throw new ArgumentException(signatureAlgorithm.Value);
+                    }
+                }
+            }
+            finally
+            {
+                if (gotReference)
+                {
+                    certSafeHandle.DangerousRelease();
+                }
+            }
+        }
+
         private static IntPtr GetSslMethod(bool isServer, long options)
         {
             options &= libssl.ProtocolMask;

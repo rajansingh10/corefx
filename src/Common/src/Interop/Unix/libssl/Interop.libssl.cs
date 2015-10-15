@@ -29,7 +29,7 @@ internal static partial class Interop
         internal static extern IntPtr SSL_CTX_new(IntPtr meth);
 
         [DllImport(Interop.Libraries.LibSsl)]
-        internal static extern long SSL_CTX_ctrl(SafeSslContextHandle ctx, int cmd, long larg, IntPtr parg);
+        internal static extern long SSL_CTX_ctrl(SafeSslContextHandle ctx, SslCtrlOption cmd, long larg, IntPtr parg);
 
         [DllImport(Interop.Libraries.LibSsl)]
         internal static extern SafeSslHandle SSL_new(SafeSslContextHandle ctx);
@@ -108,6 +108,20 @@ internal static partial class Interop
 
         [DllImport(Interop.Libraries.LibSsl)]
         internal static extern void SSL_CTX_set_quiet_shutdown(SafeSslContextHandle ctx, int mode);
+
+        [DllImport(Interop.Libraries.LibSsl)]
+        internal static extern long SSL_ctrl(SafeSslHandle ssl, SslCtrlOption cmd, long larg, IntPtr parg);
+
+        [DllImport(Interop.Libraries.LibSsl)]
+        internal static extern IntPtr SSL_get_peer_finished(SafeSslHandle ssl, IntPtr buf, int count);
+
+        [DllImport(Interop.Libraries.LibSsl)]
+        internal static extern IntPtr SSL_get_finished(SafeSslHandle ssl, IntPtr buf, int count);
+
+        internal static bool SSL_session_reused(SafeSslHandle ssl)
+        {
+            return SSL_ctrl(ssl, libssl.SslCtrlOption.SSL_CTRL_GET_SESSION_REUSED, 0, IntPtr.Zero) == 1;
+        }
 
         internal static SafeSharedX509NameStackHandle SSL_get_client_CA_list(SafeSslHandle ssl)
         {

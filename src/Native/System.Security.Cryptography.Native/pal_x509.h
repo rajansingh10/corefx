@@ -275,3 +275,8 @@ Shims the i2d_X509_PUBKEY method, providing X509_get_X509_PUBKEY(x) as the input
 Returns the number of bytes written to buf.
 */
 extern "C" int32_t EncodeX509SubjectPublicKeyInfo(X509* x, uint8_t* buf);
+
+/*
+Shims the X509_digest method.
+*/
+extern "C" int X509Digest(X509* x, const EVP_MD *type, unsigned char *md, unsigned int *len);

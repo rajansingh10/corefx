@@ -366,4 +366,10 @@
   <data name="net_ssl_x509Name_push_failed_error" xml:space="preserve">
     <value>Failed to push X509_NAME into stack.</value>
   </data>
+  <data name="net_ssl_get_channel_binding_token_failed" xml:space="preserve">
+    <value>Fetching channel binding token failed with OpenSSL error - {0}.</value>
+  </data>
+  <data name="net_ssl_invalid_certificate" xml:space="preserve">
+    <value>SSL certificate returned is invalid, OpenSSL error - {0}.</value>
+  </data>
 </root>

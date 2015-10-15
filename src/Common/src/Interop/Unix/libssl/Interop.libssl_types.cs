@@ -9,7 +9,6 @@ internal static partial class Interop
 {
     internal static partial class libssl
     {
-        internal const int SSL_CTRL_OPTIONS = 32;
         internal static bool OPENSSL_NO_COMP = true; //no compression true by default
 
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
@@ -164,6 +163,12 @@ internal static partial class Interop
             SSL_VERIFY_PEER = 0x01,
             SSL_VERIFY_FAIL_IF_NO_PEER_CERT = 0x02,
             SSL_VERIFY_CLIENT_ONCE = 0x04
+		}
+
+        internal enum SslCtrlOption
+        {
+            SSL_CTRL_GET_SESSION_REUSED = 8,
+            SSL_CTRL_OPTIONS = 32
         }
     }
 }

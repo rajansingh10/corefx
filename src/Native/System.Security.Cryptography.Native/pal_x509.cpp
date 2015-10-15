@@ -275,3 +275,8 @@ extern "C" int32_t EncodeX509SubjectPublicKeyInfo(X509* x509, uint8_t* buf)
     // X509_get_X509_PUBKEY returns an interior pointer, so should not be freed
     return i2d_X509_PUBKEY(X509_get_X509_PUBKEY(x509), &buf);
 }
+
+extern "C" int X509Digest(X509* x, const EVP_MD *type, unsigned char *md, unsigned int *len)
+{
+	return X509_digest(x, type, md, len);
+}

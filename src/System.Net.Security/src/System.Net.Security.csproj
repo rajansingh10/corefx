@@ -239,6 +239,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.Crypto.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.Crypto.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.EVP.cs">
+      <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.EVP.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Security.Cryptography.Native\Interop.X509.cs">
       <Link>Common\Interop\Unix\System.Security.Cryptography.Native\Interop.X509.cs</Link>
     </Compile>
@@ -250,6 +253,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.Initialization.cs">
       <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.Initialization.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeEvpMdCtxHandle.Unix.cs">
+      <Link>Common\Microsoft\Win32\SafeHandles\SafeEvpMdCtxHandle.Unix.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeX509Handles.Unix.cs">
       <Link>Common\Microsoft\Win32\SafeHandles\SafeX509Handles.Unix.cs</Link>

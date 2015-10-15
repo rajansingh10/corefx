@@ -64,10 +64,11 @@ namespace System.Net
             return retVal;
         }
 
-        public static SafeFreeContextBufferChannelBinding QueryContextChannelBinding(SafeDeleteContext phContext, ChannelBindingKind attribute)
+        public static SafeFreeContextBufferChannelBinding QueryContextChannelBinding(SafeDeleteContext securityContext, ChannelBindingKind attribute)
         {
-            // TODO (Issue #3362) To be implemented
-            throw NotImplemented.ByDesignWithMessage(SR.net_MethodNotImplementedException);
+            Interop.libssl.SafeChannelBinding bindingHandle = Interop.OpenSsl.QueryChannelBinding(securityContext.SslContext, attribute);
+            var refHandle = bindingHandle == null ? null : new SafeFreeContextBufferChannelBinding(bindingHandle);
+            return refHandle;
         }
 
         public static void QueryContextStreamSizes(SafeDeleteContext securityContext, out StreamSizes streamSizes)
