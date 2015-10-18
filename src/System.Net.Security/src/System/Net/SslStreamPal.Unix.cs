@@ -64,18 +64,11 @@ namespace System.Net
             return retVal;
         }
 
-        public static SafeFreeContextBufferChannelBinding QueryContextChannelBinding(SafeDeleteContext securityContext, ChannelBindingKind attribute, bool isServer)
+        public static SafeFreeContextBufferChannelBinding QueryContextChannelBinding(SafeDeleteContext securityContext, ChannelBindingKind attribute)
         {
-            if (attribute != ChannelBindingKind.Endpoint &&
-                attribute != ChannelBindingKind.Unique)
-            {
-                return null;
-            }
-
-            SafeFreeContextBufferChannelBinding refHandle = SafeFreeContextBufferChannelBinding.CreateEmptyHandle();
-
-            SafeFreeContextBufferChannelBinding.QueryContextChannelBinding(securityContext, attribute, isServer, refHandle);
-
+            Interop.SafeChannelBinding bindingHandle = null;
+            Interop.OpenSsl.QueryContextChannelBinding(securityContext.SslContext, attribute, out bindingHandle);
+            var refHandle = bindingHandle == null ? null : new SafeFreeContextBufferChannelBinding(bindingHandle);
             return refHandle;
         }
 

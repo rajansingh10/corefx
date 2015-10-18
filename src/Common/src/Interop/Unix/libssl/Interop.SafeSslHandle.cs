@@ -4,10 +4,24 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Authentication.ExtendedProtection;
 using Microsoft.Win32.SafeHandles;
 
 internal static partial class Interop
 {
+    [StructLayout(LayoutKind.Sequential)]
+    struct SEC_CHANNEL_BINDINGS
+    {
+        internal Int32 dwInitiatorAddrType;
+        internal Int32 cbInitiatorLength;
+        internal Int32 dwInitiatorOffset;
+        internal Int32 dwAcceptorAddrType;
+        internal Int32 cbAcceptorLength;
+        internal Int32 dwAcceptorOffset;
+        internal Int32 cbApplicationDataLength;
+        internal Int32 dwApplicationDataOffset;
+    }
+
     internal static partial class libssl
     {
         internal sealed class SafeSslContextHandle : SafeHandle
@@ -137,6 +151,77 @@ internal static partial class Interop
             private SafeSslHandle() : base(IntPtr.Zero, true)
             {
             }   
+        }
+    }
+
+    internal sealed class SafeChannelBinding : SafeHandle
+    {
+        internal int Length
+        {
+            get;
+            private set;
+        }
+
+        internal IntPtr CertHashPtr
+        {
+            get;
+            private set;
+        }
+
+        private static readonly byte[] tlsServerEndPointByteArray = System.Text.Encoding.UTF8.GetBytes("tls-server-end-point:");
+        private static readonly byte[] tlsUniqueByteArray = System.Text.Encoding.UTF8.GetBytes("tls-unique:");
+        private static readonly int secChannelBindingSize = Marshal.SizeOf<SEC_CHANNEL_BINDINGS>();
+        private readonly int cbtPrefixByteArraySize;
+
+        private byte[] getPrefixBytes(ChannelBindingKind kind)
+        {
+            if (kind == ChannelBindingKind.Endpoint)
+            {
+                return tlsServerEndPointByteArray;
+            }
+            else
+            {
+                return tlsUniqueByteArray;
+            }
+        }
+
+        public SafeChannelBinding(ChannelBindingKind kind)
+            : base(IntPtr.Zero, true)
+        {
+            byte[] cbtPrefix = getPrefixBytes(kind);
+            cbtPrefixByteArraySize = cbtPrefix.Length;
+            handle = Marshal.AllocHGlobal(secChannelBindingSize + cbtPrefixByteArraySize + Interop.libssl.CertHashMaxSize);
+            IntPtr cbtPrefixPtr = handle + secChannelBindingSize;
+            Marshal.Copy(cbtPrefix, 0, cbtPrefixPtr, cbtPrefixByteArraySize);
+            CertHashPtr = cbtPrefixPtr + cbtPrefixByteArraySize;
+        }
+
+        internal void SetCertHashLength(int certHashLength)
+        {
+            int cbtLength = cbtPrefixByteArraySize + certHashLength;
+            Length = secChannelBindingSize + cbtLength;
+
+            SEC_CHANNEL_BINDINGS channelBindings = new SEC_CHANNEL_BINDINGS()
+            {
+                cbApplicationDataLength = cbtLength,
+                dwApplicationDataOffset = (Int32)secChannelBindingSize
+            };
+            Marshal.StructureToPtr(channelBindings, handle, true);
+        }
+
+        public override bool IsInvalid
+        {
+            get { return handle == IntPtr.Zero; }
+        }
+
+        protected override bool ReleaseHandle()
+        {
+            if (handle != IntPtr.Zero)
+            {
+                Marshal.FreeHGlobal(handle);
+                handle = IntPtr.Zero;
+            }
+            return true;
         }
     }
 }

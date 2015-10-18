@@ -123,7 +123,7 @@ namespace System.Net.Security
             ChannelBinding result = null;
             if (_securityContext != null)
             {
-                result = SslStreamPal.QueryContextChannelBinding(_securityContext, kind, _serverMode);
+                result = SslStreamPal.QueryContextChannelBinding(_securityContext, kind);
             }
 
             GlobalLog.Leave("SecureChannel#" + Logging.HashString(this) + "::GetChannelBindingToken", Logging.HashString(result));

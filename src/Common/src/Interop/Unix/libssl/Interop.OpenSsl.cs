@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.Win32.SafeHandles;
@@ -14,6 +15,29 @@ internal static partial class Interop
     internal static class OpenSsl
     {
         #region internal methods
+
+        internal static void QueryContextChannelBinding(SafeSslHandle context, ChannelBindingKind bindingType, out SafeChannelBinding bindingHandle)
+        {
+            if (bindingType != ChannelBindingKind.Endpoint &&
+                bindingType != ChannelBindingKind.Unique)
+            {
+                bindingHandle = null;
+                return;
+            }
+
+            bindingHandle = new SafeChannelBinding(bindingType);
+
+            switch (bindingType)
+            {
+                case ChannelBindingKind.Endpoint:
+                    QueryEndPointChannelBindings(context, bindingHandle);
+                    break;
+
+                case ChannelBindingKind.Unique:
+                    QueryUniqueChannelBindings(context, bindingHandle);
+                    break;
+            }
+        }
 
         //TODO (Issue #3362) Set remote certificate options
         internal static SafeSslHandle AllocateSslContext(long options, SafeX509Handle certHandle, SafeEvpPKeyHandle certKeyHandle, bool isServer, bool remoteCertRequired)
@@ -207,6 +231,33 @@ internal static partial class Interop
         #endregion
 
         #region private methods
+
+        private static void QueryEndPointChannelBindings(SafeSslHandle context, SafeChannelBinding bindingHandle)
+        {
+            int certHashLength = 0;
+
+            SafeX509Handle cert = Interop.OpenSsl.GetPeerCertificate(context);
+
+            // TODO directly referring EVP_sha256 in below code is not as per RFC. but I could not find, a good way to
+            // fetch desired data from cert & then get correct function. Need to fix later.
+#if false
+            libcrypto.X509_digest(cert, libcrypto.EVP_get_digestbynid(n), channelBindingsPtr, ref certHashLength);
+#endif
+            libcrypto.X509_digest(cert, libcrypto.EVP_sha256(), bindingHandle.CertHashPtr, ref certHashLength);
+
+            bindingHandle.SetCertHashLength(certHashLength);
+        }
+
+        private static void QueryUniqueChannelBindings(SafeSslHandle context, SafeChannelBinding bindingHandle)
+        {
+            bool sessionReused = libssl.SSL_session_reused(context);
+            int certHashLength = context.IsServer ^ sessionReused ?
+                                 libssl.SSL_get_peer_finished(context, bindingHandle.CertHashPtr, libssl.CertHashMaxSize) :
+                                 libssl.SSL_get_finished(context, bindingHandle.CertHashPtr, libssl.CertHashMaxSize);
+
+            bindingHandle.SetCertHashLength(certHashLength);
+        }
+
         private static IntPtr GetSslMethod(bool isServer, long options)
         {
             options &= libssl.ProtocolMask;

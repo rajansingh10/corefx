@@ -181,7 +181,7 @@ namespace System.Net
             return GetSecurityStatusPalFromInterop(errorCode);
         }
 
-        public unsafe static SafeFreeContextBufferChannelBinding QueryContextChannelBinding(SafeDeleteContext securityContext, ChannelBindingKind attribute, bool serverMode)
+        public unsafe static SafeFreeContextBufferChannelBinding QueryContextChannelBinding(SafeDeleteContext securityContext, ChannelBindingKind attribute)
         {
             return SSPIWrapper.QueryContextChannelBinding(GlobalSSPI.SSPISecureChannel, securityContext, (Interop.Secur32.ContextAttribute)attribute);
         }

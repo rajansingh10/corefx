@@ -258,73 +258,34 @@ namespace System.Net.Security
         }
     }
 
-    internal abstract class SafeFreeContextBufferChannelBinding : ChannelBinding
+    internal sealed class SafeFreeContextBufferChannelBinding : ChannelBinding
     {
-        private int _size;
+        private Interop.SafeChannelBinding channelBinding = null;
 
         public override int Size
         {
-            get { return _size; }
+            get { return channelBinding.Length; }
         }
 
         public override bool IsInvalid
         {
-            get { return handle == new IntPtr(0) || handle == new IntPtr(-1); }
+            get { return channelBinding.IsInvalid; }
         }
 
-        internal unsafe void Set(IntPtr value)
+        public SafeFreeContextBufferChannelBinding(Interop.SafeChannelBinding binding)
         {
-            this.handle = value;
+            Debug.Assert(null != binding, "channelBinding is null");
+            bool gotRef = false;
+            binding.DangerousAddRef(ref gotRef);
+            Debug.Assert(gotRef, "Unexpected failure in AddRef of SafeChannelBinding");
+            handle = binding.DangerousGetHandle();
+            channelBinding = binding;
         }
 
-        internal static SafeFreeContextBufferChannelBinding CreateEmptyHandle()
-        {
-            return new SafeFreeContextBufferChannelBinding_SECURITY();
-        }
-
-        internal static void QueryContextChannelBinding(SafeDeleteContext securityContext, ChannelBindingKind attribute, bool isServer, SafeFreeContextBufferChannelBinding refHandle)
-        {
-            Interop.ChannelBinding.Bindings bindings;
-
-            try
-            {
-                bool ignore = false;
-                securityContext.DangerousAddRef(ref ignore);
-
-                switch (attribute)
-                {
-                    case ChannelBindingKind.Endpoint:
-                        Interop.ChannelBinding.getEndPointChannelBindings(securityContext.SslContext, attribute, out bindings);
-                        break;
-
-                    case ChannelBindingKind.Unique:
-                        Interop.ChannelBinding.getUniqueChannelBindings(securityContext.SslContext, attribute, isServer, out bindings);
-                        break;
-
-                    default:
-                        throw new NotSupportedException();
-                }
-            }
-            finally
-            {
-                securityContext.DangerousRelease();
-            }
-
-            refHandle.Set(bindings.pBindings);
-            refHandle._size = bindings.length;
-        }
-    }
-
-    internal sealed class SafeFreeContextBufferChannelBinding_SECURITY : SafeFreeContextBufferChannelBinding
-    {
         protected override bool ReleaseHandle()
         {
-            if (this.handle != IntPtr.Zero)
-            {
-                Marshal.FreeHGlobal(this.handle);
-                SetHandle(IntPtr.Zero);
-            }
-
+            channelBinding.DangerousRelease();
+            channelBinding.Dispose();
             return true;
         }
     }

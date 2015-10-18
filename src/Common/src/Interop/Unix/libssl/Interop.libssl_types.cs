@@ -15,6 +15,8 @@ internal static partial class Interop
                                            Options.SSL_OP_NO_TLSv1 | Options.SSL_OP_NO_TLSv1_1 |
                                            Options.SSL_OP_NO_TLSv1_2;
 
+        internal const int CertHashMaxSize = 128;
+
         [StructLayout(LayoutKind.Sequential)]
         internal struct SSL_CIPHER
         {
